@@ -16,72 +16,64 @@ st.set_page_config(
 # =========================
 # 디자인 톤
 # =========================
-BG_COLOR = "#0A3B1C"   # 딥그린 (고급/부드러운 톤)
+BG_COLOR = "#0A3B1C"   # 딥그린
 TEXT_MAIN = "#EAF6EE"
 TEXT_SUB = "rgba(234,246,238,0.75)"
 CARD_BG = "rgba(255,255,255,0.05)"
 
 # =========================
-# 목업 고정 배치 (빈칸 유지)
-#  - 빈칸은 ("","") 로 유지
-#  - 나중에 추가할 때 빈칸에만 채우면 됩니다
+# 목업(PDF) 표기 순서대로 고정 배치 :contentReference[oaicite:1]{index=1}
+# - 빈칸은 ("","") 그대로 유지
 # =========================
 GRID = [
-    # row 1
+    # 상단: 생성기 3개
     [
         ("상세페이지 생성기", "https://misharp-image-maker-v3.streamlit.app/"),
-        ("썸네일 생성기", "https://misharp-thumbnail-maker-2026.streamlit.app/"),
         ("GIF 생성기", "https://misharp-gif-maker.streamlit.app/"),
+        ("썸네일 생성기", "https://misharp-thumbnail-maker-2026.streamlit.app/"),
     ],
-    # row 2
+    # 이미지 자르기 + 빈칸 + 빈칸
     [
         ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
-        ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
-        ("", ""),  # 빈칸 (목업 유지)
+        ("", ""),  # 빈 버튼(추후 추가)
+        ("", ""),  # 빈 버튼(추후 추가)
     ],
-    # row 3
+
+    # 운영/어드민
     [
+        ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
         ("미샵 홈페이지", "https://misharp.co.kr/"),
         ("미샵 스마트스토어", "https://smartstore.naver.com/misharp2006"),
-        ("", ""),  # 빈칸
     ],
-    # row 4
     [
         ("셀메이트", "https://misharp.sellmate.co.kr/login/login_prototype.asp"),
         ("스마트비즈", "https://smart-biz.co.kr/main.php"),
-        ("", ""),  # 빈칸
-    ],
-    # row 5
-    [
         ("크리마", "https://admin.cre.ma/v2/login"),
-        ("찰나", "https://charlla.io/"),
-        ("", ""),  # 빈칸
     ],
-    # row 6
+    [
+        ("찰나", "https://charlla.io/"),
+        ("", ""),
+        ("", ""),
+    ],
+
+    # 콘텐츠/마케팅
     [
         ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
         ("미샵 티스토리", "https://misharp2006.tistory.com/"),
-        ("", ""),  # 빈칸
+        ("", ""),
     ],
-    # row 7
     [
         ("핀터레스트", "https://kr.pinterest.com/"),
-        ("URL 단축", "https://shor.kr/"),
-        ("", ""),  # 빈칸
-    ],
-    # row 8
-    [
-        ("ChatGPT", "https://chatgpt.com/"),
-        ("Gemini", "https://gemini.google.com/app"),
-        ("", ""),  # 빈칸
-    ],
-    # row 9
-    [
         ("네이버 실시간 패션키워드", "https://datalab.naver.com/shoppingInsight/sCategory.naver"),
         ("네이버 쇼핑 패션", "https://shopping.naver.com/window/main/fashion-group"),
-        ("", ""),  # 빈칸
     ],
-    # row 10
+    [
+        ("URL 단축", "https://shor.kr/"),
+        ("제미나이", "https://gemini.google.com/app"),
+        ("챗 GPT", "https://chatgpt.com/"),  # ✅ 링크 확실히 연결
+    ],
+
+    # 홈 바로가기
     [
         ("네이버 홈", "https://www.naver.com/"),
         ("다음 홈", "https://www.daum.net/"),
@@ -175,7 +167,6 @@ def today_event(date_obj: datetime.date) -> str:
     if date_obj in kr:
         return str(kr.get(date_obj))
 
-    # 필요하면 계속 추가하면 됨
     custom = {
         (1, 1): "새해 첫날",
         (2, 14): "발렌타인데이",
@@ -280,7 +271,7 @@ with c3:
 
 st.write("")
 
-# 하단: 목업 고정 그리드 + 빈칸 유지
+# 하단: 목업 순서 고정 + 빈칸 유지
 for row in GRID:
     cols = st.columns(3, gap="large")
     for col, (name, link) in zip(cols, row):
@@ -291,7 +282,6 @@ for row in GRID:
                     unsafe_allow_html=True,
                 )
             else:
-                # 빈칸도 "자리"를 유지해야 하므로 높이만 확보
                 st.markdown('<div style="height:52px;"></div>', unsafe_allow_html=True)
     st.write("")
 
