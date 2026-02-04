@@ -13,45 +13,84 @@ st.set_page_config(
     layout="wide",
 )
 
+# =========================
+# 디자인 톤
+# =========================
 BG_COLOR = "#0A3B1C"   # 딥그린 (고급/부드러운 톤)
 TEXT_MAIN = "#EAF6EE"
 TEXT_SUB = "rgba(234,246,238,0.75)"
 CARD_BG = "rgba(255,255,255,0.05)"
 
-TOOLS = [
-    ("상세페이지 생성기", "https://misharp-image-maker-v3.streamlit.app/"),
-    ("썸네일 생성기", "https://misharp-thumbnail-maker-2026.streamlit.app/"),
-    ("GIF 생성기", "https://misharp-gif-maker.streamlit.app/"),
-
-    ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
-    ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
-    ("미샵 홈페이지", "https://misharp.co.kr/"),
-
-    ("미샵 스마트스토어", "https://smartstore.naver.com/misharp2006"),
-    ("셀메이트", "https://misharp.sellmate.co.kr/login/login_prototype.asp"),
-    ("스마트비즈", "https://smart-biz.co.kr/main.php"),
-
-    ("크리마", "https://admin.cre.ma/v2/login"),
-    ("찰나", "https://charlla.io/"),
-    ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
-
-    ("미샵 티스토리", "https://misharp2006.tistory.com/"),
-    ("핀터레스트", "https://kr.pinterest.com/"),
-    ("URL 단축", "https://shor.kr/"),
-
-    ("ChatGPT", "https://chatgpt.com/"),
-    ("Gemini", "https://gemini.google.com/app"),
-    ("네이버 실시간 패션키워드", "https://datalab.naver.com/shoppingInsight/sCategory.naver"),
-
-    ("네이버 쇼핑 패션", "https://shopping.naver.com/window/main/fashion-group"),
-    ("네이버 홈", "https://www.naver.com/"),
-    ("다음 홈", "https://www.daum.net/"),
-
-    ("구글 홈", "https://www.google.com/"),
+# =========================
+# 목업 고정 배치 (빈칸 유지)
+#  - 빈칸은 ("","") 로 유지
+#  - 나중에 추가할 때 빈칸에만 채우면 됩니다
+# =========================
+GRID = [
+    # row 1
+    [
+        ("상세페이지 생성기", "https://misharp-image-maker-v3.streamlit.app/"),
+        ("썸네일 생성기", "https://misharp-thumbnail-maker-2026.streamlit.app/"),
+        ("GIF 생성기", "https://misharp-gif-maker.streamlit.app/"),
+    ],
+    # row 2
+    [
+        ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
+        ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
+        ("", ""),  # 빈칸 (목업 유지)
+    ],
+    # row 3
+    [
+        ("미샵 홈페이지", "https://misharp.co.kr/"),
+        ("미샵 스마트스토어", "https://smartstore.naver.com/misharp2006"),
+        ("", ""),  # 빈칸
+    ],
+    # row 4
+    [
+        ("셀메이트", "https://misharp.sellmate.co.kr/login/login_prototype.asp"),
+        ("스마트비즈", "https://smart-biz.co.kr/main.php"),
+        ("", ""),  # 빈칸
+    ],
+    # row 5
+    [
+        ("크리마", "https://admin.cre.ma/v2/login"),
+        ("찰나", "https://charlla.io/"),
+        ("", ""),  # 빈칸
+    ],
+    # row 6
+    [
+        ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
+        ("미샵 티스토리", "https://misharp2006.tistory.com/"),
+        ("", ""),  # 빈칸
+    ],
+    # row 7
+    [
+        ("핀터레스트", "https://kr.pinterest.com/"),
+        ("URL 단축", "https://shor.kr/"),
+        ("", ""),  # 빈칸
+    ],
+    # row 8
+    [
+        ("ChatGPT", "https://chatgpt.com/"),
+        ("Gemini", "https://gemini.google.com/app"),
+        ("", ""),  # 빈칸
+    ],
+    # row 9
+    [
+        ("네이버 실시간 패션키워드", "https://datalab.naver.com/shoppingInsight/sCategory.naver"),
+        ("네이버 쇼핑 패션", "https://shopping.naver.com/window/main/fashion-group"),
+        ("", ""),  # 빈칸
+    ],
+    # row 10
+    [
+        ("네이버 홈", "https://www.naver.com/"),
+        ("다음 홈", "https://www.daum.net/"),
+        ("구글 홈", "https://www.google.com/"),
+    ],
 ]
 
 # =========================
-# 스타일
+# CSS
 # =========================
 st.markdown(
     f"""
@@ -86,6 +125,7 @@ st.markdown(
         color: {TEXT_MAIN};
         font-size: 17px;
         font-weight: 600;
+        line-height: 1.25;
       }}
 
       a.tool-btn {{
@@ -128,14 +168,16 @@ st.markdown(
 )
 
 # =========================
-# 오늘의 정보
+# 오늘의 정보: 이벤트
 # =========================
-def today_event(date_obj):
+def today_event(date_obj: datetime.date) -> str:
     kr = holidays.KR()
     if date_obj in kr:
         return str(kr.get(date_obj))
 
+    # 필요하면 계속 추가하면 됨
     custom = {
+        (1, 1): "새해 첫날",
         (2, 14): "발렌타인데이",
         (3, 14): "화이트데이",
         (5, 8): "어버이날",
@@ -145,26 +187,57 @@ def today_event(date_obj):
     }
     return custom.get((date_obj.month, date_obj.day), "특별한 일정 없음")
 
+# =========================
+# 오늘의 정보: 날씨(상태 + 최저/최고)
+# =========================
 @st.cache_data(ttl=600)
-def get_weather():
+def get_weather() -> str:
     url = (
         "https://api.open-meteo.com/v1/forecast"
         "?latitude=37.5665&longitude=126.9780"
         "&daily=weathercode,temperature_2m_max,temperature_2m_min"
         "&timezone=Asia%2FSeoul"
     )
-    data = requests.get(url, timeout=10).json()
+    r = requests.get(url, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+
+    code = int(data["daily"]["weathercode"][0])
     tmin = round(data["daily"]["temperature_2m_min"][0])
     tmax = round(data["daily"]["temperature_2m_max"][0])
-    return f"서울·경기  |  최저 {tmin}° / 최고 {tmax}°"
 
-st_autorefresh(interval=1000, key="clock")
+    def code_to_text(c: int) -> str:
+        if c == 0:
+            return "맑음"
+        if c in (1, 2, 3):
+            return "흐림"
+        if c in (45, 48):
+            return "안개"
+        if c in (51, 53, 55, 56, 57):
+            return "이슬비"
+        if c in (61, 63, 65, 66, 67):
+            return "비"
+        if c in (71, 73, 75, 77):
+            return "눈"
+        if c in (80, 81, 82):
+            return "소나기"
+        if c in (95, 96, 99):
+            return "천둥/폭풍"
+        return "변동"
 
+    weather_text = code_to_text(code)
+    return f"서울·경기 {weather_text}  |  최저 {tmin}° / 최고 {tmax}°"
+
+# =========================
+# 화면 렌더
+# =========================
+st_autorefresh(interval=1000, key="clock_refresh")  # 1초마다 시간 갱신
 now = datetime.datetime.now()
 
 st.markdown('<div class="wrap">', unsafe_allow_html=True)
 st.markdown('<div class="title">MISHARP Creative Dashboard</div>', unsafe_allow_html=True)
 
+# 상단 3칸 정보
 c1, c2, c3 = st.columns(3, gap="large")
 
 with c1:
@@ -190,11 +263,16 @@ with c2:
     )
 
 with c3:
+    try:
+        weather_value = get_weather()
+    except Exception:
+        weather_value = "날씨 정보를 불러오지 못했어요"
+
     st.markdown(
         f"""
         <div class="info-card">
           <div class="info-label">오늘의 날씨</div>
-          <div class="info-value">{get_weather()}</div>
+          <div class="info-value">{weather_value}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -202,16 +280,22 @@ with c3:
 
 st.write("")
 
-cols = st.columns(3, gap="large")
-for i, (name, link) in enumerate(TOOLS):
-    with cols[i % 3]:
-        st.markdown(
-            f'<a class="tool-btn" href="{link}" target="_blank">{name}</a>',
-            unsafe_allow_html=True,
-        )
-    if i % 3 == 2:
-        st.write("")
+# 하단: 목업 고정 그리드 + 빈칸 유지
+for row in GRID:
+    cols = st.columns(3, gap="large")
+    for col, (name, link) in zip(cols, row):
+        with col:
+            if name.strip():
+                st.markdown(
+                    f'<a class="tool-btn" href="{link}" target="_blank" rel="noopener noreferrer">{name}</a>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                # 빈칸도 "자리"를 유지해야 하므로 높이만 확보
+                st.markdown('<div style="height:52px;"></div>', unsafe_allow_html=True)
+    st.write("")
 
+# 푸터
 st.markdown(
     """
     <div class="footer">
