@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone, timedelta
 import requests
 import streamlit as st
 import holidays
@@ -14,32 +15,35 @@ st.set_page_config(
 )
 
 # =========================
+# 한국시간(KST) 고정
+# =========================
+KST = timezone(timedelta(hours=9))
+
+# =========================
 # 디자인 톤
 # =========================
-BG_COLOR = "#0A3B1C"   # 딥그린
+BG_COLOR = "#0A3B1C"
 TEXT_MAIN = "#EAF6EE"
 TEXT_SUB = "rgba(234,246,238,0.75)"
 CARD_BG = "rgba(255,255,255,0.05)"
 
 # =========================
-# 목업(PDF) 표기 순서대로 고정 배치 :contentReference[oaicite:1]{index=1}
-# - 빈칸은 ("","") 그대로 유지
+# 목업 순서 고정 그리드 (빈칸 유지)
 # =========================
 GRID = [
-    # 상단: 생성기 3개
+    # 생성기
     [
         ("상세페이지 생성기", "https://misharp-image-maker-v3.streamlit.app/"),
         ("GIF 생성기", "https://misharp-gif-maker.streamlit.app/"),
         ("썸네일 생성기", "https://misharp-thumbnail-maker-2026.streamlit.app/"),
     ],
-    # 이미지 자르기 + 빈칸 + 빈칸
     [
         ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
-        ("", ""),  # 빈 버튼(추후 추가)
-        ("", ""),  # 빈 버튼(추후 추가)
+        ("", ""),
+        ("", ""),
     ],
 
-    # 운영/어드민
+    # 운영
     [
         ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
         ("미샵 홈페이지", "https://misharp.co.kr/"),
@@ -56,7 +60,7 @@ GRID = [
         ("", ""),
     ],
 
-    # 콘텐츠/마케팅
+    # 콘텐츠 / 마케팅
     [
         ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
         ("미샵 티스토리", "https://misharp2006.tistory.com/"),
@@ -69,11 +73,11 @@ GRID = [
     ],
     [
         ("URL 단축", "https://shor.kr/"),
-        ("제미나이", "https://gemini.google.com/app"),
-        ("챗 GPT", "https://chatgpt.com/"),  # ✅ 링크 확실히 연결
+        ("Gemini", "https://gemini.google.com/app"),
+        ("ChatGPT", "https://chatgpt.com/"),
     ],
 
-    # 홈 바로가기
+    # 홈
     [
         ("네이버 홈", "https://www.naver.com/"),
         ("다음 홈", "https://www.daum.net/"),
@@ -87,13 +91,9 @@ GRID = [
 st.markdown(
     f"""
     <style>
-      .stApp {{
-        background: {BG_COLOR};
-      }}
-      .wrap {{
-        max-width: 1200px;
-        margin: 0 auto;
-      }}
+      .stApp {{ background: {BG_COLOR}; }}
+      .wrap {{ max-width: 1200px; margin: 0 auto; }}
+
       .title {{
         color: {TEXT_MAIN};
         font-size: 32px;
@@ -160,9 +160,9 @@ st.markdown(
 )
 
 # =========================
-# 오늘의 정보: 이벤트
+# 오늘의 이벤트
 # =========================
-def today_event(date_obj: datetime.date) -> str:
+def today_event(date_obj):
     kr = holidays.KR()
     if date_obj in kr:
         return str(kr.get(date_obj))
@@ -179,56 +179,46 @@ def today_event(date_obj: datetime.date) -> str:
     return custom.get((date_obj.month, date_obj.day), "특별한 일정 없음")
 
 # =========================
-# 오늘의 정보: 날씨(상태 + 최저/최고)
+# 날씨 (상태 + 최저/최고)
 # =========================
 @st.cache_data(ttl=600)
-def get_weather() -> str:
+def get_weather():
     url = (
         "https://api.open-meteo.com/v1/forecast"
         "?latitude=37.5665&longitude=126.9780"
         "&daily=weathercode,temperature_2m_max,temperature_2m_min"
         "&timezone=Asia%2FSeoul"
     )
-    r = requests.get(url, timeout=10)
-    r.raise_for_status()
-    data = r.json()
+    data = requests.get(url, timeout=10).json()
 
     code = int(data["daily"]["weathercode"][0])
     tmin = round(data["daily"]["temperature_2m_min"][0])
     tmax = round(data["daily"]["temperature_2m_max"][0])
 
-    def code_to_text(c: int) -> str:
-        if c == 0:
-            return "맑음"
-        if c in (1, 2, 3):
-            return "흐림"
-        if c in (45, 48):
-            return "안개"
-        if c in (51, 53, 55, 56, 57):
-            return "이슬비"
-        if c in (61, 63, 65, 66, 67):
-            return "비"
-        if c in (71, 73, 75, 77):
-            return "눈"
-        if c in (80, 81, 82):
-            return "소나기"
-        if c in (95, 96, 99):
-            return "천둥/폭풍"
+    def code_to_text(c):
+        if c == 0: return "맑음"
+        if c in (1, 2, 3): return "흐림"
+        if c in (45, 48): return "안개"
+        if c in (51, 53, 55, 56, 57): return "이슬비"
+        if c in (61, 63, 65, 66, 67): return "비"
+        if c in (71, 73, 75, 77): return "눈"
+        if c in (80, 81, 82): return "소나기"
+        if c in (95, 96, 99): return "천둥/폭풍"
         return "변동"
 
-    weather_text = code_to_text(code)
-    return f"서울·경기 {weather_text}  |  최저 {tmin}° / 최고 {tmax}°"
+    return f"서울·경기 {code_to_text(code)} | 최저 {tmin}° / 최고 {tmax}°"
 
 # =========================
 # 화면 렌더
 # =========================
-st_autorefresh(interval=1000, key="clock_refresh")  # 1초마다 시간 갱신
-now = datetime.datetime.now()
+st_autorefresh(interval=1000, key="clock_refresh")
+
+now = datetime.datetime.now(KST)
 
 st.markdown('<div class="wrap">', unsafe_allow_html=True)
 st.markdown('<div class="title">MISHARP Creative Dashboard</div>', unsafe_allow_html=True)
 
-# 상단 3칸 정보
+# 상단 정보
 c1, c2, c3 = st.columns(3, gap="large")
 
 with c1:
@@ -271,12 +261,12 @@ with c3:
 
 st.write("")
 
-# 하단: 목업 순서 고정 + 빈칸 유지
+# 버튼 그리드 (목업 고정)
 for row in GRID:
     cols = st.columns(3, gap="large")
     for col, (name, link) in zip(cols, row):
         with col:
-            if name.strip():
+            if name:
                 st.markdown(
                     f'<a class="tool-btn" href="{link}" target="_blank" rel="noopener noreferrer">{name}</a>',
                     unsafe_allow_html=True,
