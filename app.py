@@ -29,6 +29,10 @@ CARD_BG = "rgba(255,255,255,0.05)"
 
 # =========================
 # 목업 순서 고정 그리드 (빈칸 유지)
+# - 요청사항 반영:
+#   1) "이미지 자르기 툴" 옆 빈칸 -> "로그 생성기" 추가
+#   2) "찰나" 옆 빈칸 -> "인포크링크" 추가
+#   3) "미샵 티스토리" 옆 -> "구글블로거" 추가
 # =========================
 GRID = [
     # 생성기
@@ -39,7 +43,7 @@ GRID = [
     ],
     [
         ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
-        ("", ""),
+        ("로그 생성기", "https://ms-blog-maker-v1.streamlit.app/"),  # ✅ (1) 추가
         ("", ""),
     ],
 
@@ -56,7 +60,7 @@ GRID = [
     ],
     [
         ("찰나", "https://charlla.io/"),
-        ("", ""),
+        ("인포크링크", "https://link.inpock.co.kr/user/login"),  # ✅ (2) 추가
         ("", ""),
     ],
 
@@ -64,7 +68,7 @@ GRID = [
     [
         ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
         ("미샵 티스토리", "https://misharp2006.tistory.com/"),
-        ("", ""),
+        ("구글블로거", "https://www.blogger.com/blog/posts/1654930311466056029?hl=ko&tab=jj"),  # ✅ (3) 추가
     ],
     [
         ("핀터레스트", "https://kr.pinterest.com/"),
@@ -212,7 +216,6 @@ def get_weather():
 # 화면 렌더
 # =========================
 st_autorefresh(interval=1000, key="clock_refresh")
-
 now = datetime.datetime.now(KST)
 
 st.markdown('<div class="wrap">', unsafe_allow_html=True)
@@ -261,7 +264,7 @@ with c3:
 
 st.write("")
 
-# 버튼 그리드 (목업 고정)
+# 버튼 그리드 (목업 고정 + 빈칸 유지)
 for row in GRID:
     cols = st.columns(3, gap="large")
     for col, (name, link) in zip(cols, row):
@@ -275,7 +278,9 @@ for row in GRID:
                 st.markdown('<div style="height:52px;"></div>', unsafe_allow_html=True)
     st.write("")
 
-# 푸터
+# =========================
+# 푸터 (요청사항 4번)
+# =========================
 st.markdown(
     """
     <div class="footer">
