@@ -95,7 +95,7 @@ LAYOUT = [
 ]
 
 # =========================
-# CSS (여백 통일 핵심)
+# CSS (간격 조정 핵심 포함)
 # =========================
 st.markdown(
     f"""
@@ -117,6 +117,11 @@ st.markdown(
         margin-bottom: 20px;
       }}
 
+      /* 상단 카드 영역 아래 간격 확보 */
+      .top-info {{
+        margin-bottom: 22px;  /* ✅ 카드와 첫 버튼 사이 간격 */
+      }}
+
       .info-card {{
         background: {CARD_BG};
         border: 1px solid rgba(255,255,255,0.14);
@@ -134,6 +139,7 @@ st.markdown(
         color: {TEXT_MAIN};
         font-size: 17px;
         font-weight: 600;
+        line-height: 1.25;
       }}
 
       a.tool-btn {{
@@ -157,12 +163,17 @@ st.markdown(
         transform: translateY(-2px);
       }}
 
-      /* 🔥 핵심: 구분선 여백 완전 통일 */
+      /* 구분선: 위/아래 간격 동일 + 넉넉 */
       .divider {{
         height: 1px;
         background: {DIVIDER_COLOR};
-        margin: 28px 0 28px 0; /* 위/아래 동일 + 넉넉 */
+        margin: 28px 0 28px 0;
         border-radius: 999px;
+      }}
+
+      /* 상단 카드 아래에 넣는 스페이서(추가 안전장치) */
+      .spacer {{
+        height: 10px;
       }}
 
       .footer {{
@@ -174,7 +185,6 @@ st.markdown(
         color: {TEXT_SUB};
       }}
 
-      /* Streamlit 기본 여백 제거 */
       .block-container {{
         padding-top: 28px;
         padding-bottom: 20px;
@@ -205,13 +215,15 @@ def get_weather():
     tmax = round(data["daily"]["temperature_2m_max"][0])
 
     def code_to_text(c):
-        return (
-            "맑음" if c == 0 else
-            "흐림" if c in (1,2,3) else
-            "비" if c in (61,63,65) else
-            "눈" if c in (71,73,75) else
-            "변동"
-        )
+        if c == 0: return "맑음"
+        if c in (1, 2, 3): return "흐림"
+        if c in (45, 48): return "안개"
+        if c in (51, 53, 55, 56, 57): return "이슬비"
+        if c in (61, 63, 65, 66, 67): return "비"
+        if c in (71, 73, 75, 77): return "눈"
+        if c in (80, 81, 82): return "소나기"
+        if c in (95, 96, 99): return "천둥/폭풍"
+        return "변동"
 
     return f"서울·경기 {code_to_text(code)} | 최저 {tmin}° / 최고 {tmax}°"
 
@@ -224,25 +236,38 @@ now = datetime.datetime.now(KST)
 st.markdown('<div class="wrap">', unsafe_allow_html=True)
 st.markdown('<div class="title">MISHARP Creative Dashboard</div>', unsafe_allow_html=True)
 
-c1, c2, c3 = st.columns(3, gap="large")
+# ✅ 상단 정보 블록을 top-info로 감싸서 아래 간격 강제
+st.markdown('<div class="top-info">', unsafe_allow_html=True)
 
+c1, c2, c3 = st.columns(3, gap="large")
 with c1:
     st.markdown(
-        f"<div class='info-card'><div class='info-label'>실시간 날짜 / 시간</div><div class='info-value'>{now:%Y-%m-%d %H:%M:%S}</div></div>",
+        f"<div class='info-card'><div class='info-label'>실시간 날짜 / 시간</div>"
+        f"<div class='info-value'>{now:%Y-%m-%d %H:%M:%S}</div></div>",
         unsafe_allow_html=True,
     )
 
 with c2:
     st.markdown(
-        f"<div class='info-card'><div class='info-label'>금일 이벤트</div><div class='info-value'>{today_event(now.date())}</div></div>",
+        f"<div class='info-card'><div class='info-label'>금일 이벤트</div>"
+        f"<div class='info-value'>{today_event(now.date())}</div></div>",
         unsafe_allow_html=True,
     )
 
 with c3:
+    try:
+        weather_value = get_weather()
+    except Exception:
+        weather_value = "날씨 정보를 불러오지 못했어요"
+
     st.markdown(
-        f"<div class='info-card'><div class='info-label'>오늘의 날씨</div><div class='info-value'>{get_weather()}</div></div>",
+        f"<div class='info-card'><div class='info-label'>오늘의 날씨</div>"
+        f"<div class='info-value'>{weather_value}</div></div>",
         unsafe_allow_html=True,
     )
+
+st.markdown("</div>", unsafe_allow_html=True)  # top-info 닫기
+st.markdown("<div class='spacer'></div>", unsafe_allow_html=True)  # ✅ 추가 안전 여백
 
 # =========================
 # 버튼 + 구분선 렌더
@@ -257,7 +282,7 @@ for item in LAYOUT:
         with col:
             if name:
                 st.markdown(
-                    f"<a class='tool-btn' href='{link}' target='_blank'>{name}</a>",
+                    f"<a class='tool-btn' href='{link}' target='_blank' rel='noopener noreferrer'>{name}</a>",
                     unsafe_allow_html=True,
                 )
             else:
