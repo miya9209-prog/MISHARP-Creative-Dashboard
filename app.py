@@ -26,16 +26,15 @@ BG_COLOR = "#0A3B1C"
 TEXT_MAIN = "#EAF6EE"
 TEXT_SUB = "rgba(234,246,238,0.75)"
 CARD_BG = "rgba(255,255,255,0.05)"
+DIVIDER = "rgba(255,255,255,0.20)"  # 구분선(얇은 흰색)
 
 # =========================
-# 목업 순서 고정 그리드 (빈칸 유지)
-# - 요청사항 반영:
-#   1) "이미지 자르기 툴" 옆 빈칸 -> "블로그 생성기" 추가
-#   2) "찰나" 옆 빈칸 -> "인포크링크" 추가
-#   3) "미샵 티스토리" 옆 -> "구글블로거" 추가
+# 섹션/그리드
+# - "DIVIDER"는 구분선 렌더
+# - 빈칸은 ("","") 유지
 # =========================
-GRID = [
-    # 생성기
+LAYOUT = [
+    # 1) 생성기 섹션
     [
         ("상세페이지 생성기", "https://misharp-image-maker-v3.streamlit.app/"),
         ("GIF 생성기", "https://misharp-gif-maker.streamlit.app/"),
@@ -43,15 +42,16 @@ GRID = [
     ],
     [
         ("이미지 자르기 툴", "https://misharp-image-crop-v1.streamlit.app/"),
-        ("블로그 생성기", "https://ms-blog-maker-v1.streamlit.app/"),  # ✅ (1) 추가
+        ("블로그 생성기", "https://ms-blog-maker-v1.streamlit.app/"),
         ("", ""),
     ],
+    "DIVIDER",
 
-    # 운영
+    # 2) 운영 섹션
     [
         ("카페24 어드민", "https://eclogin.cafe24.com/Shop/"),
         ("미샵 홈페이지", "https://misharp.co.kr/"),
-        ("미샵 스마트스토어", "https://smartstore.naver.com/misharp2006"),
+        ("미샵 스마트 스토어", "https://smartstore.naver.com/misharp2006"),
     ],
     [
         ("셀메이트", "https://misharp.sellmate.co.kr/login/login_prototype.asp"),
@@ -60,28 +60,35 @@ GRID = [
     ],
     [
         ("찰나", "https://charlla.io/"),
-        ("인포크링크", "https://link.inpock.co.kr/user/login"),  # ✅ (2) 추가
-        ("", ""),
+        ("인포크 링크", "https://link.inpock.co.kr/user/login"),
+        ("URL 단축", "https://shor.kr/"),  # ✅ 인포크 링크 옆으로 이동
     ],
+    "DIVIDER",
 
-    # 콘텐츠 / 마케팅
+    # 3) 블로그 섹션
     [
         ("미샵 네이버 블로그", "https://blog.naver.com/misharp2006"),
         ("미샵 티스토리", "https://misharp2006.tistory.com/"),
-        ("구글블로거", "https://www.blogger.com/blog/posts/1654930311466056029?hl=ko&tab=jj"),  # ✅ (3) 추가
+        ("구글 블로거", "https://www.blogger.com/blog/posts/1654930311466056029?hl=ko&tab=jj"),
     ],
+    "DIVIDER",
+
+    # 4) 인사이트 섹션
     [
         ("핀터레스트", "https://kr.pinterest.com/"),
         ("네이버 실시간 패션키워드", "https://datalab.naver.com/shoppingInsight/sCategory.naver"),
         ("네이버 쇼핑 패션", "https://shopping.naver.com/window/main/fashion-group"),
     ],
+    "DIVIDER",
+
+    # 5) AI 섹션
     [
-        ("URL 단축", "https://shor.kr/"),
-        ("Gemini", "https://gemini.google.com/app"),
-        ("ChatGPT", "https://chatgpt.com/"),
+        ("ChatGPT", "https://chatgpt.com/"),  # ✅ 기존 URL단축 자리로 이동(아래 섹션 첫 칸)
+        ("제미나이", "https://gemini.google.com/app"),
+        ("클로드 AI", "https://claude.ai/login?returnTo=%2F%3F"),  # ✅ 추가
     ],
 
-    # 홈
+    # 6) 홈 섹션
     [
         ("네이버 홈", "https://www.naver.com/"),
         ("다음 홈", "https://www.daum.net/"),
@@ -143,6 +150,13 @@ st.markdown(
         background: rgba(255,255,255,0.08);
         border-color: rgba(255,255,255,0.55);
         transform: translateY(-2px);
+      }}
+
+      .divider {{
+        height: 1px;
+        background: {DIVIDER};
+        margin: 18px 0 18px 0;
+        border-radius: 999px;
       }}
 
       .footer {{
@@ -264,8 +278,15 @@ with c3:
 
 st.write("")
 
-# 버튼 그리드 (목업 고정 + 빈칸 유지)
-for row in GRID:
+# =========================
+# 하단 레이아웃 렌더 (구분선 포함)
+# =========================
+for item in LAYOUT:
+    if item == "DIVIDER":
+        st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+        continue
+
+    row = item
     cols = st.columns(3, gap="large")
     for col, (name, link) in zip(cols, row):
         with col:
@@ -276,11 +297,8 @@ for row in GRID:
                 )
             else:
                 st.markdown('<div style="height:52px;"></div>', unsafe_allow_html=True)
-    st.write("")
 
-# =========================
-# 푸터 (요청사항 4번)
-# =========================
+# 푸터
 st.markdown(
     """
     <div class="footer">
